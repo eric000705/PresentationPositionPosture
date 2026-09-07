@@ -18,20 +18,45 @@
       box-shadow: -4px 0 25px rgba(0,0,0,0.7); border-left: 1px solid #1f2937;
       z-index: 20; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .sheet-handle { 
+.sheet-handle { 
   display: none; 
   width: 100%; 
-  padding: 12px 0 10px 0; 
+  height: 56px; /* 핸들 높이 고정 */
+  flex-direction: column;
   justify-content: center; 
   align-items: center; 
   cursor: pointer;
   position: sticky;
   top: 0;
-  background: #111827; /* 사이드바 배경과 일치 */
+  background: #1e293b; /* 본문보다 밝은 톤으로 버튼 영역 분리 */
+  border-bottom: 1px solid #334155;
   z-index: 30;
+  gap: 5px;
+  user-select: none;
+  margin: 0 -18px; /* 사이드바 좌우 패딩을 덮어 꽉 찬 탭 형태로 확장 */
+  padding: 0 18px;
 }
-    .sheet-handle-bar { width: 40px; height: 4px; background: #475569; border-radius: 2px; }
 
+.sheet-handle-bar { 
+  width: 44px; 
+  height: 4px; 
+  background: #64748b; 
+  border-radius: 2px; 
+}
+.sheet-handle-text {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sheet-handle-icon {
+  font-size: 0.72rem;
+  color: #818cf8;
+  transition: transform 0.2s ease;
+}
     h2 { font-size: 1.15rem; border-bottom: 2px solid #6366f1; padding-bottom: 8px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
     .control-group { display: flex; flex-direction: column; gap: 6px; }
     label { font-size: 0.82rem; font-weight: bold; color: #94a3b8; }
@@ -66,12 +91,14 @@
     bottom: 0; 
     left: 0; 
     width: 100%; 
-    max-height: 80vh;
+    max-height: 82vh;
     border-left: none; 
-    border-top: 1px solid #374151; 
-    border-radius: 16px 16px 0 0;
-    padding: 0 18px 24px 18px; /* 상단 패딩을 0으로 맞춰 sticky 핸들이 최상단에 밀착 */
-    transform: translateY(calc(100% - 50px)); /* 접혀있을 때 핸들 영역(50px)만 화면 하단에 상시 노출 */
+    border-top: 2px solid #6366f1; /* 상단 보라색 포인트 라인 */
+    border-radius: 18px 18px 0 0;
+    padding: 0 18px 24px 18px;
+    /* 핸들 높이(56px)만큼만 남기고 완벽히 숨김 (내부 텍스트 노출 차단) */
+    transform: translateY(calc(100% - 56px));
+    background: #111827;
   }
   #sidebar.expanded { 
     transform: translateY(0); 
@@ -79,7 +106,7 @@
   .sheet-handle { 
     display: flex; 
   }
-  h2 { font-size: 1.05rem; }
+  h2 { font-size: 1.05rem; margin-top: 14px; }
 }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -96,9 +123,13 @@
   </div>
 
   <div id="sidebar">
-    <div class="sheet-handle" id="sheetHandle">
-      <div class="sheet-handle-bar"></div>
-    </div>
+<div class="sheet-handle" id="sheetHandle">
+  <div class="sheet-handle-bar"></div>
+  <div class="sheet-handle-text">
+    <span class="sheet-handle-icon" id="sheetIcon">▲</span>
+    <span id="sheetLabel">산과 설정 및 자세 선택</span>
+  </div>
+</div>
 
     <h2>
       <span>수의산과 3D 시각화</span>
@@ -170,6 +201,36 @@
   </div>
 
   <script>
+
+    // 모바일 바텀시트 토글 및 안내문구 전환
+const sidebar = document.getElementById('sidebar');
+const sheetHandle = document.getElementById('sheetHandle');
+const sheetIcon = document.getElementById('sheetIcon');
+const sheetLabel = document.getElementById('sheetLabel');
+
+function toggleBottomSheet() {
+  const isExpanded = sidebar.classList.toggle('expanded');
+  if (isExpanded) {
+    sheetIcon.textContent = '▼';
+    sheetLabel.textContent = '메뉴 닫기';
+  } else {
+    sheetIcon.textContent = '▲';
+    sheetLabel.textContent = '산과 설정 및 자세 선택';
+  }
+}
+
+sheetHandle.addEventListener('click', toggleBottomSheet);
+
+// 배경(3D 캔버스) 터치 시 메뉴 닫기
+container.addEventListener('touchstart', () => {
+  if (window.innerWidth <= 768 && sidebar.classList.contains('expanded')) {
+    sidebar.classList.remove('expanded');
+    sheetIcon.textContent = '▲';
+    sheetLabel.textContent = '산과 설정 및 자세 선택';
+  }
+}, { passive: true });
+
+    
     const FETUS_POS = { x: 0, y: 3.7, z: 2.8 };
 
     // --- 1. Three.js 기본 세팅 ---
