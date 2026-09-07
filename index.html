@@ -3,60 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>수의산과 3D: 어미소 & 송아지 태세 시각화</title>
+  <title>수의산과 3D: 표 7-3 기반 태위·태향·태세 학습 툴</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; height: 100vh; height: 100dvh; overflow: hidden; background: #070b14; color: #eee; -webkit-tap-highlight-color: transparent; }
-    
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; height: 100vh; height: 100dvh; overflow: hidden; background: #070b14; color: #eee; }
     #canvas-container { flex: 1; position: relative; height: 100%; width: 100%; touch-action: none; }
+    #loading-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #070b14; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; gap: 14px; }
+    .spinner { width: 44px; height: 44px; border: 4px solid #334155; border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* 데스크톱 사이드바 기본 */
     #sidebar {
-      width: 420px;
-      background: #111827;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: -4px 0 25px rgba(0,0,0,0.7);
-      border-left: 1px solid #1f2937;
-      z-index: 20;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 450px; background: #111827; padding: 20px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 14px;
+      box-shadow: -4px 0 25px rgba(0,0,0,0.7); border-left: 1px solid #1f2937;
+      z-index: 20; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    .sheet-handle { display: none; width: 100%; padding: 8px 0 12px 0; justify-content: center; align-items: center; cursor: pointer; }
+    .sheet-handle-bar { width: 40px; height: 4px; background: #475569; border-radius: 2px; }
 
-    /* 모바일 바텀시트 토글 핸들 */
-    .sheet-handle {
-      display: none;
-      width: 100%;
-      padding: 8px 0 12px 0;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-    }
-    .sheet-handle-bar {
-      width: 40px;
-      height: 4px;
-      background: #475569;
-      border-radius: 2px;
-    }
-
-    h2 { font-size: 1.2rem; border-bottom: 2px solid #6366f1; padding-bottom: 8px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+    h2 { font-size: 1.15rem; border-bottom: 2px solid #6366f1; padding-bottom: 8px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
     .control-group { display: flex; flex-direction: column; gap: 6px; }
     label { font-size: 0.82rem; font-weight: bold; color: #94a3b8; }
-    select { background: #1f2937; color: #fff; border: 1px solid #374151; padding: 10px; border-radius: 8px; font-size: 0.9rem; outline: none; -webkit-appearance: none; }
+    select { background: #1f2937; color: #fff; border: 1px solid #374151; padding: 10px; border-radius: 8px; font-size: 0.86rem; outline: none; }
     select:focus { border-color: #818cf8; }
 
     .slider-container { display: flex; align-items: center; gap: 10px; }
     .slider-container input { flex: 1; accent-color: #6366f1; }
     .slider-val { font-size: 0.8rem; width: 35px; color: #a5b4fc; }
 
-    .info-card { background: #0b0f19; border-left: 4px solid #6366f1; padding: 12px; border-radius: 8px; border: 1px solid #1e293b; border-left-width: 4px; }
-    .info-card h3 { font-size: 1rem; margin-bottom: 4px; color: #a5b4fc; }
-    .info-card p { font-size: 0.82rem; line-height: 1.45; color: #cbd5e1; margin-bottom: 4px; }
+    .info-card { background: #0b0f19; border-left: 4px solid #6366f1; padding: 14px; border-radius: 8px; border: 1px solid #1e293b; border-left-width: 4px; display: flex; flex-direction: column; gap: 8px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; }
+    .info-card h3 { font-size: 1.05rem; color: #a5b4fc; }
     .badge { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 0.72rem; font-weight: bold; }
     .badge-normal { background: #065f46; color: #34d399; }
     .badge-abnormal { background: #7f1d1d; color: #f87171; }
+
+    .info-row { font-size: 0.83rem; line-height: 1.45; color: #cbd5e1; }
+    .info-row strong { color: #94a3b8; margin-right: 4px; display: inline-block; min-width: 85px; }
 
     .view-btns { display: flex; gap: 6px; }
     .view-btns button { flex: 1; background: #1f2937; border: 1px solid #374151; color: #e2e8f0; padding: 8px 4px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; }
@@ -65,114 +48,99 @@
     .legend-box { background: #0b0f19; border-radius: 8px; padding: 10px; font-size: 0.75rem; color: #94a3b8; display: flex; flex-direction: column; gap: 5px; border: 1px solid #1e293b; }
     .color-chip { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 
-    /* 모바일 반응형 (화면 폭 768px 이하) */
     @media (max-width: 768px) {
       body { flex-direction: column; }
-      #canvas-container { height: 100%; }
-
       #sidebar {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        max-height: 80vh;
-        border-left: none;
-        border-top: 1px solid #374151;
-        border-radius: 16px 16px 0 0;
-        padding: 12px 18px 24px 18px;
-        box-shadow: 0 -8px 25px rgba(0,0,0,0.8);
-        transform: translateY(calc(100% - 64px)); /* 기본은 접힘 상태 */
+        position: absolute; bottom: 0; left: 0; width: 100%; max-height: 80vh;
+        border-left: none; border-top: 1px solid #374151; border-radius: 16px 16px 0 0;
+        padding: 12px 18px 24px 18px; transform: translateY(calc(100% - 64px));
       }
-
-      #sidebar.expanded {
-        transform: translateY(0);
-      }
-
+      #sidebar.expanded { transform: translateY(0); }
       .sheet-handle { display: flex; }
       h2 { font-size: 1.05rem; }
-      .header-sub { display: none; }
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body>
 
-  <div id="canvas-container"></div>
+  <div id="canvas-container">
+    <div id="loading-screen">
+      <div class="spinner"></div>
+      <p id="loading-msg" style="color: #94a3b8; font-size: 0.95rem;">어미 소 3D 모델 로딩 중...</p>
+    </div>
+  </div>
 
   <div id="sidebar">
-    <!-- 모바일 드래그/클릭 핸들 -->
     <div class="sheet-handle" id="sheetHandle">
       <div class="sheet-handle-bar"></div>
     </div>
 
     <h2>
-      <span id="titleText">수의산과 3D 시각화</span>
-      <span class="header-sub" style="font-size: 0.75rem; color: #818cf8; font-weight: normal;">터치 조작 지원</span>
+      <span>수의산과 3D 시각화</span>
+      <span style="font-size: 0.75rem; color: #818cf8; font-weight: normal;">표 7-3 검증 모드</span>
     </h2>
 
     <div class="control-group">
-      <label>1. 태위 (Presentation)</label>
+      <label for="presentation">1. 태위 (Presentation)</label>
       <select id="presentation">
-        <option value="anterior">세로·머리태위 (종위·두위 - 앞다리 진입)</option>
-        <option value="posterior">세로·꼬리태위 (종위·미위 - 뒷다리 진입)</option>
-        <option value="transverse">가로태위 (횡위)</option>
+        <option value="anterior">세로·머리태위</option>
+        <option value="posterior">세로·꼬리태위</option>
+        <option value="transverse">가로태위</option>
+        <option value="vertical">수직태위</option>
       </select>
     </div>
 
     <div class="control-group">
-      <label>2. 태향 (Position)</label>
+      <label for="position">2. 태향 (Position)</label>
       <select id="position">
-        <option value="dorsal">위쪽태향 (상태향/배천골 - 등 위쪽)</option>
-        <option value="ventral">아래쪽태향 (하태향/배치골 - 등 아래쪽)</option>
-        <option value="rightLateral">오른쪽 옆태향 (우배·장골)</option>
-        <option value="leftLateral">왼쪽 옆태향 (좌배·장골)</option>
+        <!-- 동적으로 필터링됨 -->
       </select>
     </div>
 
     <div class="control-group">
-      <label>3. 태세 (Posture - 다리 및 머리)</label>
+      <label for="posture">3. 태아의 자세 (태세 / Posture)</label>
       <select id="posture">
-        <option value="normal">정상 태세 (사지 및 머리 전방 신전)</option>
-        <option value="headLateral">머리 옆쪽 굴곡 (측두위)</option>
-        <option value="headVentral">머리 가슴쪽 하방 굴곡 (두정위/흉두위)</option>
-        <option value="carpalFlexionUni">한쪽 앞무릎(완관절) 굴곡위</option>
-        <option value="carpalFlexionBi">양쪽 앞무릎(완관절) 굴곡위</option>
-        <option value="shoulderFlexion">어깨(견갑골) 굴곡위 (다리가 몸 밑으로)</option>
-        <option value="breech">엉덩관절(고관절) 굴곡위 (둔위)</option>
-        <option value="hockFlexion">뒷발목(비절) 굴곡위</option>
-        <option value="dogSitting">견좌자세 (양 뒷다리 전방 신장)</option>
+        <!-- 동적으로 필터링됨 -->
       </select>
     </div>
 
     <div class="control-group">
-      <label>어미소 투시 투명도 조절</label>
+      <label for="damOpacity">어미소 외피 투명도 조절</label>
       <div class="slider-container">
-        <input type="range" id="damOpacity" min="0.05" max="0.8" step="0.05" value="0.22">
-        <span id="opacityVal" class="slider-val">22%</span>
+        <input type="range" id="damOpacity" min="0.0" max="0.9" step="0.05" value="0.28">
+        <span id="opacityVal" class="slider-val">28%</span>
       </div>
     </div>
 
     <div class="control-group">
-      <label>관찰 시점 프리셋</label>
+      <label>관찰 시점 프리셋 (태아 기준)</label>
       <div class="view-btns">
-        <button onclick="setView(0, 2.2, 6.2)">산도 직후방</button>
-        <button onclick="setView(6.8, 2.2, 0)">우측면 투시</button>
-        <button onclick="setView(0, 8.5, 0.1)">상단 천골면</button>
+        <button onclick="setView(0, 0.4, 3.2)">산도 직후방 (외음부 뷰)</button>
+        <button onclick="setView(3.8, 0.3, 0)">우측면 투시</button>
+        <button onclick="setView(0, 4.2, 0.1)">상단 천골면</button>
       </div>
     </div>
 
     <div class="info-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-        <h3 id="info-title">정상 분만 자세</h3>
-        <span id="info-badge" class="badge badge-normal">정상</span>
+      <div class="card-header">
+        <h3 id="info-status">구분</h3>
+        <span id="info-main-badge" class="badge"></span>
       </div>
-      <p id="info-desc">양 앞다리가 모체 출산길 쪽으로 뻗어 있고 머리가 앞다리 위에 놓여 있습니다.</p>
-      <p><strong>처치:</strong> <span id="info-treatment">자연 분만 관찰 및 보조</span></p>
+      <div class="info-row">
+        <strong>일반명(구용어):</strong>
+        <span id="info-alias">-</span>
+      </div>
+      <div class="info-row">
+        <strong>태아의 자세:</strong>
+        <span id="info-posture-desc">-</span>
+      </div>
     </div>
 
     <div class="legend-box">
-      <div><span class="color-chip" style="background:#ef4444;"></span><b>적색 림(Ring)</b>: 골반강 출구 (천골·치골 경계면)</div>
+      <div><span class="color-chip" style="background:#ef4444;"></span><b>적색 링</b>: 어미소 골반강 입구 (Pelvic brim)</div>
       <div><span class="color-chip" style="background:#f59e0b;"></span><b>황색 봉</b>: 송아지 등뼈(척추, 태향 판단선)</div>
       <div><span class="color-chip" style="background:#f97316;"></span><b>주황색 구</b>: 앞무릎(완관절) / 뒷발목(비절)</div>
       <div><span class="color-chip" style="background:#10b981;"></span><b>녹색 블록</b>: 송아지 발굽(구절 부위)</div>
@@ -180,163 +148,111 @@
   </div>
 
   <script>
-    // --- 1. Three.js 기본 씬 셋업 ---
+    const FETUS_POS = { x: 0, y: 3.7, z: 2.8 };
+
+    // --- 1. Three.js 기본 세팅 ---
     const container = document.getElementById('canvas-container');
+    const loadingScreen = document.getElementById('loading-screen');
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x070b14);
 
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-    // 화면 폭에 따른 초기 카메라 거리 조절
-    const isMobileInit = window.innerWidth <= 768;
-    camera.position.set(isMobileInit ? 5.5 : 4.8, isMobileInit ? 3.8 : 3.2, isMobileInit ? 7.2 : 5.8);
+    camera.position.set(FETUS_POS.x + 2.5, FETUS_POS.y + 1.2, FETUS_POS.z + 3.2);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // 모바일 고해상도 최적화
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
     container.appendChild(renderer.domElement);
 
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.target.set(0, 1.8, 0);
+    controls.target.set(FETUS_POS.x, FETUS_POS.y, FETUS_POS.z);
 
-    // 모바일 터치 대응 (1손가락 회전, 2손가락 줌/패닝)
-    controls.touches = {
-      ONE: THREE.TOUCH.ROTATE,
-      TWO: THREE.TOUCH.DOLLY_PAN
-    };
+    scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    dirLight.position.set(6, 12, 8);
+    scene.add(dirLight);
+    const backLight = new THREE.DirectionalLight(0x818cf8, 0.5);
+    backLight.position.set(-6, 4, -6);
+    scene.add(backLight);
 
-    // 조명 세팅
-    scene.add(new THREE.AmbientLight(0xffffff, 0.65));
-    const keyLight = new THREE.DirectionalLight(0xffffff, 0.85);
-    keyLight.position.set(6, 12, 8);
-    scene.add(keyLight);
-    const rimLight = new THREE.DirectionalLight(0x818cf8, 0.5);
-    rimLight.position.set(-6, 5, -6);
-    scene.add(rimLight);
-
-    const grid = new THREE.GridHelper(12, 24, 0x1e293b, 0x0f172a);
+    const grid = new THREE.GridHelper(14, 28, 0x1e293b, 0x0f172a);
+    grid.position.y = 0;
     scene.add(grid);
 
-    // --- 2. 엄마소 해부학적 모델 생성 ---
-    const damGroup = new THREE.Group();
-    scene.add(damGroup);
+    const worldCenter = new THREE.Group();
+    scene.add(worldCenter);
 
-    const cowTransMat = new THREE.MeshStandardMaterial({
-      color: 0x64748b,
-      transparent: true,
-      opacity: 0.22,
-      depthWrite: false,
-      roughness: 0.4,
-      metalness: 0.1
-    });
+    // --- 2. 골반강 림 및 마커 ---
+    const pelvicRim = new THREE.Mesh(
+      new THREE.TorusGeometry(0.55, 0.05, 16, 48),
+      new THREE.MeshBasicMaterial({ color: 0xef4444 })
+    );
+    pelvicRim.position.set(0, 3.5, 4.50);
+    worldCenter.add(pelvicRim);
 
-    const cowWireMat = new THREE.MeshBasicMaterial({
-      color: 0x94a3b8,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.15
-    });
+    const sacrumMarker = new THREE.Mesh(
+      new THREE.BoxGeometry(0.35, 0.08, 0.08),
+      new THREE.MeshBasicMaterial({ color: 0xf87171 })
+    );
+    sacrumMarker.position.set(0, 4.08, 4.50); // 림 상단 위치에 정확히 정렬
+    worldCenter.add(sacrumMarker);
 
-    const cowBoneSolidMat = new THREE.MeshStandardMaterial({ color: 0xcfd8dc, roughness: 0.5 });
-    const udderMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, transparent: true, opacity: 0.35 });
+    // --- 3. 외부 GLB 모델 로더 ---
+    const importedMaterials = [];
+    const gltfLoader = new THREE.GLTFLoader();
 
-    function addPart(geo, pos, rot, mat = cowTransMat, wire = true) {
-      const mesh = new THREE.Mesh(geo, mat);
-      if (pos) mesh.position.set(...pos);
-      if (rot) mesh.rotation.set(...rot);
-      damGroup.add(mesh);
+    gltfLoader.load(
+      'models/cow.glb',
+      function (gltf) {
+        const cowMesh = gltf.scene;
+        const box = new THREE.Box3().setFromObject(cowMesh);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
 
-      if (wire) {
-        const wMesh = new THREE.Mesh(geo, cowWireMat);
-        if (pos) wMesh.position.set(...pos);
-        if (rot) wMesh.rotation.set(...rot);
-        damGroup.add(wMesh);
+        const targetScale = 9 / size.z;
+        cowMesh.scale.setScalar(targetScale);
+
+        cowMesh.rotation.y = Math.PI;
+        cowMesh.position.x = center.x * targetScale;
+        cowMesh.position.y = -box.min.y * targetScale;
+        cowMesh.position.z = center.z * targetScale + 0.4;
+
+        cowMesh.traverse((child) => {
+          if (child.isMesh) {
+            const transMat = new THREE.MeshStandardMaterial({
+              color: 0x64748b,
+              roughness: 0.35,
+              metalness: 0.1,
+              transparent: true,
+              opacity: 0.28,
+              depthWrite: false,
+              side: THREE.DoubleSide
+            });
+            child.material = transMat;
+            importedMaterials.push(transMat);
+          }
+        });
+
+        worldCenter.add(cowMesh);
+        loadingScreen.style.display = 'none';
+      },
+      undefined,
+      function (err) {
+        console.warn('models/cow.glb 로드 오류:', err);
+        document.getElementById('loading-msg').innerText = 'models/cow.glb 로드 실패. 로컬 웹 서버(Live Server) 구동 여부를 확인하세요.';
       }
-      return mesh;
-    }
+    );
 
-    // 흉곽 & 복부 & 엉덩이
-    const thoraxGeo = new THREE.SphereGeometry(1.4, 20, 16);
-    thoraxGeo.scale(0.85, 1.15, 1.4);
-    addPart(thoraxGeo, [0, 2.0, -1.2]);
-
-    const abdomenGeo = new THREE.SphereGeometry(1.55, 20, 16);
-    abdomenGeo.scale(0.95, 1.1, 1.3);
-    addPart(abdomenGeo, [0, 1.85, 0.3]);
-
-    const rumpGeo = new THREE.CylinderGeometry(1.3, 1.45, 1.6, 18);
-    rumpGeo.scale(0.88, 1.0, 1.0);
-    addPart(rumpGeo, [0, 2.15, 1.35], [Math.PI / 2.2, 0, 0]);
-
-    // 척추 능선
-    const spineRidge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.14, 4.8), cowBoneSolidMat);
-    spineRidge.position.set(0, 3.25, -0.6);
-    damGroup.add(spineRidge);
-
-    // 머리/목/뿔/귀
-    const headGroup = new THREE.Group();
-    headGroup.position.set(0, 2.7, -3.2);
-    headGroup.add(addPart(new THREE.BoxGeometry(0.85, 0.6, 0.8), [0, 0.3, 0], [-0.3, 0, 0], cowTransMat, false));
-    headGroup.add(addPart(new THREE.CylinderGeometry(0.3, 0.42, 0.9, 12), [0, -0.2, -0.6], [Math.PI / 3, 0, 0], cowTransMat, false));
-
-    function createHorn(isLeft) {
-      const side = isLeft ? 1 : -1;
-      const horn = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.65, 10), cowBoneSolidMat);
-      horn.position.set(side * 0.55, 0.65, -0.1);
-      horn.rotation.set(0.2, 0, -side * (Math.PI / 3.2));
-      return horn;
-    }
-    headGroup.add(createHorn(true));
-    headGroup.add(createHorn(false));
-
-    addPart(new THREE.CylinderGeometry(0.65, 0.95, 1.8, 14), [0, 2.35, -2.3], [Math.PI / 3.8, 0, 0]);
-    damGroup.add(headGroup);
-
-    // 유방 & 꼬리
-    const udder = addPart(new THREE.SphereGeometry(0.45, 14, 10), [0, 1.05, 0.9], [0, 0, 0], udderMat, false);
-    udder.scale.set(0.9, 0.7, 1.2);
-
-    const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.04, 1.6, 8), cowBoneSolidMat);
-    tail.position.set(0, 1.8, 2.3);
-    tail.rotation.x = -0.25;
-    damGroup.add(tail);
-
-    // 4다리
-    function createLeg(x, z, isHind) {
-      const leg = new THREE.Group();
-      leg.position.set(x, 0, z);
-      leg.add(addPart(new THREE.CylinderGeometry(isHind ? 0.32 : 0.28, 0.2, 1.1, 10), [0, 1.5, 0], [isHind ? -0.1 : 0.1, 0, 0], cowTransMat, false));
-      const joint = new THREE.Mesh(new THREE.SphereGeometry(0.18, 10, 10), cowBoneSolidMat);
-      joint.position.set(0, 0.95, isHind ? -0.05 : 0);
-      leg.add(joint);
-      leg.add(addPart(new THREE.CylinderGeometry(0.16, 0.13, 0.9, 10), [0, 0.5, 0], [0, 0, 0], cowTransMat, false));
-      const hoof = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.14, 0.32), cowBoneSolidMat);
-      hoof.position.set(0, 0.07, 0.05);
-      leg.add(hoof);
-      damGroup.add(leg);
-    }
-    createLeg(0.9, -1.8, false);
-    createLeg(-0.9, -1.8, false);
-    createLeg(0.95, 1.3, true);
-    createLeg(-0.95, 1.3, true);
-
-    // 산과 림 (Pelvic Brim)
-    const pelvicBrim = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.045, 16, 48), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
-    pelvicBrim.position.set(0, 2.05, 1.85);
-    damGroup.add(pelvicBrim);
-
-    const sacrumMarker = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.08, 0.08), new THREE.MeshBasicMaterial({ color: 0xf87171 }));
-    sacrumMarker.position.set(0, 3.25, 1.85);
-    damGroup.add(sacrumMarker);
-
-    // --- 3. 송아지 모델 조립 ---
-    const fetusPivot = new THREE.Group();
-    fetusPivot.position.set(0, 2.05, 0.9);
-    scene.add(fetusPivot);
+    // --- 4. 정밀 송아지 모델 ---
+    const fetusCenter = new THREE.Group();
+    fetusCenter.position.set(FETUS_POS.x, FETUS_POS.y, FETUS_POS.z);
+    worldCenter.add(fetusCenter);
 
     const fRoot = new THREE.Group();
-    fetusPivot.add(fRoot);
+    fetusCenter.add(fRoot);
 
     const calfSkinMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.5 });
     const calfSpineMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
@@ -344,76 +260,80 @@
     const jointMat = new THREE.MeshStandardMaterial({ color: 0xf97316 });
     const hoofMat = new THREE.MeshStandardMaterial({ color: 0x10b981 });
 
-    const fBody = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.35, 1.35, 14), calfSkinMat);
+    const fBody = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.29, 1.25, 14), calfSkinMat);
     fBody.rotation.x = Math.PI / 2;
     fRoot.add(fBody);
 
-    const fSpine = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 1.3), calfSpineMat);
-    fSpine.position.set(0, 0.38, 0);
+    const fSpine = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 1.2), calfSpineMat);
+    fSpine.position.set(0, 0.32, 0);
     fRoot.add(fSpine);
 
     const neckPivot = new THREE.Group();
-    neckPivot.position.set(0, 0.1, 0.65);
+    neckPivot.position.set(0, 0.1, 0.6);
     fRoot.add(neckPivot);
 
-    const fHead = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.6, 14), calfSkinMat);
+    const fHead = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.55, 14), calfSkinMat);
     fHead.rotation.x = Math.PI / 2;
-    fHead.position.set(0, 0, 0.3);
+    fHead.position.set(0, 0, 0.28);
     neckPivot.add(fHead);
 
     function buildForeleg(isLeft) {
       const side = isLeft ? 1 : -1;
       const shoulder = new THREE.Group();
-      shoulder.position.set(side * 0.32, -0.15, 0.55);
+      shoulder.position.set(side * 0.26, -0.12, 0.45);
       fRoot.add(shoulder);
 
-      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.065, 0.45), legBoneMat);
-      upperArm.position.set(0, -0.22, 0);
+      const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.055, 0.4), legBoneMat);
+      upperArm.position.set(0, -0.2, 0);
       shoulder.add(upperArm);
 
       const carpus = new THREE.Group();
-      carpus.position.set(0, -0.45, 0);
+      carpus.position.set(0, -0.4, 0);
       shoulder.add(carpus);
 
-      const kneeBall = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 10), jointMat);
+      const kneeBall = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), jointMat);
       carpus.add(kneeBall);
 
-      const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.55), legBoneMat);
-      lowerArm.position.set(0, 0, 0.28);
+      const lowerArm = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.045, 0.5), legBoneMat);
+      lowerArm.position.set(0, 0, 0.25);
       lowerArm.rotation.x = Math.PI / 2;
       carpus.add(lowerArm);
 
-      const hoof = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.12), hoofMat);
-      hoof.position.set(0, 0, 0.58);
-      carpus.add(hoof);
+      const fetlock = new THREE.Group();
+      fetlock.position.set(0, 0, 0.5);
+      carpus.add(fetlock);
 
-      return { shoulder, carpus };
+      const hoof = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.07, 0.11), hoofMat);
+      hoof.position.set(0, 0, 0.06);
+      fetlock.add(hoof);
+
+      return { shoulder, carpus, fetlock };
     }
 
     function buildHindleg(isLeft) {
       const side = isLeft ? 1 : -1;
       const hip = new THREE.Group();
-      hip.position.set(side * 0.32, -0.12, -0.55);
+      hip.position.set(side * 0.26, -0.1, -0.48);
       fRoot.add(hip);
 
-      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.07, 0.5), legBoneMat);
-      thigh.position.set(0, -0.25, 0);
+      const thigh = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.06, 0.45), legBoneMat);
+      thigh.position.set(0, -0.22, 0);
       hip.add(thigh);
 
       const hock = new THREE.Group();
       hock.position.set(0, -0.5, 0);
       hip.add(hock);
 
-      const hockBall = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 10), jointMat);
+      const hockBall = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), jointMat);
       hock.add(hockBall);
 
-      const lowerLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.055, 0.6), legBoneMat);
-      lowerLeg.position.set(0, 0, -0.3);
+      const lowerLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.045, 0.52), legBoneMat);
+      lowerLeg.position.set(0, 0, -0.26);
       lowerLeg.rotation.x = -Math.PI / 2;
       hock.add(lowerLeg);
 
-      const hoof = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.08, 0.12), hoofMat);
-      hoof.position.set(0, 0, -0.62);
+      const hoof = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.07, 0.11), hoofMat);
+      hoof.position.set(0, 0, -0.54);
       hock.add(hoof);
 
       return { hip, hock };
@@ -424,142 +344,412 @@
     const hindLeft = buildHindleg(true);
     const hindRight = buildHindleg(false);
 
-    // --- 4. 시뮬레이션 제어 로직 ---
+    // --- 5. [표 7-3 정식 스키마 & 동적 필터 맵] ---
+    const TABLE_SCHEMA = {
+      // 1. 세로·머리태위
+      anterior: {
+        name: "세로·머리태위",
+        positions: {
+          dorsal: {
+            name: "위쪽태향",
+            postures: {
+              normalFore: {
+                status: "정상",
+                postureDesc: "양쪽 앞다리와 머리가 출산길로 펴진 자세",
+                alias: "세로·머리태위 위쪽태향(종위·두위 상태향, 종위·두위 배천골태향)"
+              },
+              headLateral: {
+                status: "실위",
+                postureDesc: "옆쪽으로 머리가 꺾인 자세",
+                alias: "옆쪽머리태위(측두위)"
+              },
+              headVertex: {
+                status: "실위",
+                postureDesc: "머리가 가슴쪽으로 꺾여 정수리가 산도 내에서 만져지는 자세",
+                alias: "정수리태위(두정위)"
+              },
+              headBreast: {
+                status: "실위",
+                postureDesc: "머리가 가슴으로 향하면서 코가 아래쪽 골반가장자리에 걸린 자세",
+                alias: "가슴머리태위(흉두위)"
+              },
+              headNape: {
+                status: "실위",
+                postureDesc: "목부분 밑으로 머리가 심하게 꺾여서 목덜미가 산도 내에서 만져지는 자세",
+                alias: "목덜미태위(항정위)"
+              },
+              headDorsal: {
+                status: "실위",
+                postureDesc: "등쪽으로 머리가 굴절된 자세",
+                alias: "등쪽머리태위(배두위)"
+              },
+              elbowFlexion: {
+                status: "실위",
+                postureDesc: "앞다리굽이관절이 출산길로 펴지지 않고 아래쪽 골반가장자리에 걸린 자세",
+                alias: "앞다리굽이관절굴절위(주관절굴절위)"
+              },
+              shoulderFlexion: {
+                status: "실위",
+                postureDesc: "어깨뼈가 몸 밑으로 굴절된 자세",
+                alias: "어깨뼈굴절위(견갑골굴절위)"
+              },
+              carpalFlexion: {
+                status: "실위",
+                postureDesc: "앞무릎관절이 출산길로 펴지지 않고 몸 밑으로 굴절된 자세",
+                alias: "앞무릎관절굴절위(완관절굴절위)"
+              },
+              fetlockFlexion: {
+                status: "실위",
+                postureDesc: "앞발굽관절이 출산길로 펴지지 않고 굴절된 자세",
+                alias: "앞발굽관절굴절위(구절굴절위)"
+              },
+              crossLegs: {
+                status: "실위",
+                postureDesc: "목 위에서 한쪽 혹은 양쪽 앞다리가 교차하는 자세",
+                alias: "정수리위교차위(정상위교차위)"
+              },
+              dogSitting: {
+                status: "실위",
+                postureDesc: "몸의 아래쪽에서 양쪽 뒷다리가 앞쪽을 향해 신장된 자세",
+                alias: "개앉음자세(견좌자세)"
+              }
+            }
+          },
+          rightLateral: {
+            name: "옆태향 (오른쪽 엉덩뼈)",
+            postures: {
+              rightDorsal: {
+                status: "실위",
+                postureDesc: "태아의 등이 어미의 오른쪽 엉덩뼈를 향하는 자세",
+                alias: "오른쪽 등·엉덩뼈태향(우배·장골태향)"
+              }
+            }
+          },
+          leftLateral: {
+            name: "옆태향 (왼쪽 엉덩뼈)",
+            postures: {
+              leftDorsal: {
+                status: "실위",
+                postureDesc: "태아의 등이 어미의 왼쪽 엉덩뼈를 향하는 자세",
+                alias: "왼쪽 등·엉덩뼈태향(좌배·장골태향)"
+              }
+            }
+          },
+          ventral: {
+            name: "아래쪽태향",
+            postures: {
+              ventralPosture: {
+                status: "실위",
+                postureDesc: "태아의 등이 어미의 두덩뼈를 향하는 자세\n(위쪽태향에서와 유사한 머리와 앞다리 태세의 이상이 있을 수 있음)",
+                alias: "세로·머리태위 아래쪽태향(종위·두위 하태향, 종위·두위 배치골태향)"
+              }
+            }
+          }
+        }
+      },
+
+      // 2. 세로·꼬리태위
+      posterior: {
+        name: "세로·꼬리태위",
+        positions: {
+          dorsal: {
+            name: "위쪽태향",
+            postures: {
+              normalHind: {
+                status: "정상",
+                postureDesc: "양쪽 뒷다리가 출산길로 펴진 자세",
+                alias: "세로·꼬리태위 위쪽태향(종위·미위 상태향, 종위·두위 배천골태향)"
+              },
+              breech: {
+                status: "실위",
+                postureDesc: "한쪽 또는 양쪽 엉덩이관절이 몸 밑으로 굴절된 자세",
+                alias: "한쪽 또는 양쪽 엉덩이관절굴절위(편측성 또는 양측성 고관절굴절위, 양측성일 경우 둔위)"
+              },
+              hockFlexion: {
+                status: "실위",
+                postureDesc: "뒷발목꿈치관절이 펴지지 않고 굴절된 상태",
+                alias: "뒷발목꿈치굴절위(비절굴절위)"
+              }
+            }
+          },
+          rightLateral: {
+            name: "옆태향 (오른쪽 엉덩뼈)",
+            postures: {
+              rightDorsal: {
+                status: "실위",
+                postureDesc: "태아의 등이 어미의 오른쪽 엉덩뼈를 향하는 자세",
+                alias: "오른쪽 등·엉덩뼈태향(우배·장골태향)"
+              }
+            }
+          },
+          leftLateral: {
+            name: "옆태향 (왼쪽 엉덩뼈)",
+            postures: {
+              leftDorsal: {
+                status: "실위",
+                postureDesc: "태아의 등이 어미의 왼쪽 엉덩뼈를 향하는 자세",
+                alias: "왼쪽 등·엉덩뼈태향(좌배·장골태향)"
+              }
+            }
+          },
+          ventral: {
+            name: "아래쪽태향",
+            postures: {
+              ventralPostureHind: {
+                status: "실위",
+                postureDesc: "태아의 등이 어미의 두덩뼈를 향하는 자세\n(위쪽태향에서와 유사한 뒷다리 태세의 이상이 있을 수 있음)",
+                alias: "세로·꼬리태위 아래쪽태향(종위·미위 하태향, 종위·미위 배치골태향)"
+              }
+            }
+          }
+        }
+      },
+
+      // 3. 가로태위
+      transverse: {
+        name: "가로태위",
+        positions: {
+          lateral: {
+            name: "옆태향",
+            postures: {
+              dorsalExit: {
+                status: "실위",
+                postureDesc: "태아의 등이 출산길을 향하는 자세",
+                alias: "가로·등쪽태위(횡배위)"
+              },
+              ventralExit: {
+                status: "실위",
+                postureDesc: "태아의 배가 출산길을 향하는 자세",
+                alias: "가로·배쪽태위(횡복위)"
+              }
+            }
+          }
+        }
+      },
+
+      // 4. 수직태위 (표 7-3: 태향 칸 생략)
+      vertical: {
+        name: "수직태위",
+        positions: {
+          none: {
+            name: "태향 생략 (표 7-3 기준)",
+            postures: {
+              dorsalExit: {
+                status: "실위",
+                postureDesc: "태아의 등이 출산길을 향하는 자세",
+                alias: "세로·등쪽태위(종배위)"
+              },
+              ventralExit: {
+                status: "실위",
+                postureDesc: "태아의 배가 출산길을 향하는 자세",
+                alias: "세로·배쪽태위(종복위)"
+              }
+            }
+          }
+        }
+      }
+    };
+
+    // --- 6. 드롭다운 동적 필터링 제어 ---
     const selPres = document.getElementById('presentation');
     const selPos = document.getElementById('position');
     const selPost = document.getElementById('posture');
 
-    const infoTitle = document.getElementById('info-title');
-    const infoBadge = document.getElementById('info-badge');
-    const infoDesc = document.getElementById('info-desc');
-    const infoTreat = document.getElementById('info-treatment');
+    const infoStatus = document.getElementById('info-status');
+    const infoMainBadge = document.getElementById('info-main-badge');
+    const infoAlias = document.getElementById('info-alias');
+    const infoPostureDesc = document.getElementById('info-posture-desc');
 
+    function refreshPositionOptions() {
+      const presKey = selPres.value;
+      const positions = TABLE_SCHEMA[presKey].positions;
+      selPos.innerHTML = "";
+
+      for (let key in positions) {
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = positions[key].name;
+        selPos.appendChild(opt);
+      }
+      refreshPostureOptions();
+    }
+
+    function refreshPostureOptions() {
+      const presKey = selPres.value;
+      const posKey = selPos.value;
+      const postures = TABLE_SCHEMA[presKey].positions[posKey].postures;
+      selPost.innerHTML = "";
+
+      for (let key in postures) {
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = postures[key].postureDesc.split('\n')[0];
+        selPost.appendChild(opt);
+      }
+      updateSimulation();
+    }
+
+    selPres.addEventListener('change', refreshPositionOptions);
+    selPos.addEventListener('change', refreshPostureOptions);
+    selPost.addEventListener('change', updateSimulation);
+
+    // --- 7. 3D 렌더링 및 해부학적 오일러 회전 엔진 ---
     function updateSimulation() {
       const pres = selPres.value;
       const pos = selPos.value;
       const post = selPost.value;
 
+      const record = TABLE_SCHEMA[pres]?.positions[pos]?.postures[post];
+      if (!record) return;
+
+      // 3D 루트 회전 초기화
       fRoot.rotation.set(0, 0, 0);
-      if (pres === 'anterior') fRoot.rotation.y = 0;
-      else if (pres === 'posterior') fRoot.rotation.y = Math.PI;
-      else if (pres === 'transverse') fRoot.rotation.y = Math.PI / 2;
 
-      let rollAngle = 0;
-      if (pos === 'dorsal') rollAngle = 0;
-      else if (pos === 'ventral') rollAngle = Math.PI;
-      else if (pos === 'rightLateral') rollAngle = Math.PI / 2;
-      else if (pos === 'leftLateral') rollAngle = -Math.PI / 2;
-      fRoot.rotateZ(rollAngle);
+      // [핵심 교정 A] 태위(Presentation) 및 자세 방향 수학적 3D 매핑
+      if (pres === 'anterior') {
+        // 세로·머리태위: 머리가 산도 출구(+Z) 향함
+        if (pos === 'dorsal') {
+          fRoot.rotation.set(0, 0, 0); // 등 위쪽 (+Y)
+        } else if (pos === 'rightLateral') {
+          fRoot.rotation.set(0, 0, -Math.PI / 2); // 등 오른쪽 (+X)
+        } else if (pos === 'leftLateral') {
+          fRoot.rotation.set(0, 0, Math.PI / 2); // 등 왼쪽 (-X)
+        } else if (pos === 'ventral') {
+          fRoot.rotation.set(0, 0, Math.PI); // 등 아래쪽 (-Y)
+        }
+      } else if (pres === 'posterior') {
+        // 세로·꼬리태위: 꼬리가 산도 출구(+Z) 향함
+        if (pos === 'dorsal') {
+          fRoot.rotation.set(0, Math.PI, 0); // 등 위쪽 (+Y)
+        } else if (pos === 'rightLateral') {
+          fRoot.rotation.set(0, Math.PI, Math.PI / 2); // 등 오른쪽 (+X)
+        } else if (pos === 'leftLateral') {
+          fRoot.rotation.set(0, Math.PI, -Math.PI / 2); // 등 왼쪽 (-X)
+        } else if (pos === 'ventral') {
+          fRoot.rotation.set(0, Math.PI, Math.PI); // 등 아래쪽 (-Y)
+        }
+      } else if (pres === 'transverse') {
+        // [완벽 검증] 가로태위: 태아 척추 장축이 좌우 X축에 100% 수평 정렬
+        if (post === 'dorsalExit') {
+          // 가로·등쪽태위(횡배위): 태아의 등이 산도 출구(+Z)를 똑바로 향함
+          fRoot.rotation.set(Math.PI / 2, Math.PI / 2, 0);
+        } else {
+          // 가로·배쪽태위(횡복위): 태아의 배가 산도 출구(+Z)를 똑바로 향함
+          fRoot.rotation.set(-Math.PI / 2, Math.PI / 2, 0);
+        }
+      } else if (pres === 'vertical') {
+        // [완벽 검증] 수직태위: 태아 척추 장축이 상하 Y축에 100% 수직 정렬
+        if (post === 'dorsalExit') {
+          // 세로·등쪽태위(종배위): 태아의 등이 산도 출구(+Z)를 똑바로 향함
+          fRoot.rotation.set(Math.PI / 2, 0, 0);
+        } else {
+          // 세로·배쪽태위(종복위): 태아의 배가 산도 출구(+Z)를 똑바로 향함
+          fRoot.rotation.set(-Math.PI / 2, 0, 0);
+        }
+      }
 
+      // 관절 각도 초기화
       neckPivot.rotation.set(0, 0, 0);
       foreLeft.shoulder.rotation.set(0, 0, 0);
       foreLeft.carpus.rotation.set(0, 0, 0);
+      foreLeft.fetlock.rotation.set(0, 0, 0);
       foreRight.shoulder.rotation.set(0, 0, 0);
       foreRight.carpus.rotation.set(0, 0, 0);
+      foreRight.fetlock.rotation.set(0, 0, 0);
       hindLeft.hip.rotation.set(0, 0, 0);
       hindLeft.hock.rotation.set(0, 0, 0);
       hindRight.hip.rotation.set(0, 0, 0);
       hindRight.hock.rotation.set(0, 0, 0);
 
+      // 표 7-3 관절 꺾임 태세 매핑
       switch (post) {
-        case 'headLateral': neckPivot.rotation.y = -Math.PI / 2.1; break;
-        case 'headVentral': neckPivot.rotation.x = Math.PI / 2.2; break;
-        case 'carpalFlexionUni': foreRight.carpus.rotation.x = -Math.PI / 1.7; break;
-        case 'carpalFlexionBi':
-          foreLeft.carpus.rotation.x = -Math.PI / 1.7;
-          foreRight.carpus.rotation.x = -Math.PI / 1.7;
+        case 'headLateral':
+          neckPivot.rotation.y = -Math.PI / 2.0;
           break;
-        case 'shoulderFlexion': foreRight.shoulder.rotation.x = -Math.PI / 2.0; break;
-        case 'breech':
-          hindLeft.hip.rotation.x = Math.PI / 1.8;
-          hindRight.hip.rotation.x = Math.PI / 1.8;
+        case 'headVertex':
+          neckPivot.rotation.x = Math.PI / 2.5;
           break;
-        case 'hockFlexion': hindRight.hock.rotation.x = Math.PI / 1.8; break;
+        case 'headBreast':
+          neckPivot.rotation.x = Math.PI / 1.8;
+          break;
+        case 'headNape':
+          neckPivot.rotation.x = Math.PI / 1.35;
+          break;
+        case 'headDorsal':
+          neckPivot.rotation.x = -Math.PI / 2.4;
+          break;
+        case 'elbowFlexion':
+          foreRight.shoulder.rotation.x = -Math.PI / 4.0;
+          foreRight.carpus.rotation.x = -Math.PI / 3.5;
+          break;
+        case 'shoulderFlexion':
+          foreRight.shoulder.rotation.x = -Math.PI / 1.9;
+          break;
+        case 'carpalFlexion':
+          foreRight.carpus.rotation.x = -Math.PI / 1.6;
+          break;
+        case 'fetlockFlexion':
+          foreRight.fetlock.rotation.x = -Math.PI / 1.8;
+          break;
+        case 'crossLegs':
+          foreLeft.shoulder.rotation.z = -0.32;
+          foreRight.shoulder.rotation.z = 0.32;
+          break;
         case 'dogSitting':
           hindLeft.hip.rotation.x = Math.PI / 1.7;
           hindRight.hip.rotation.x = Math.PI / 1.7;
           hindLeft.hock.rotation.x = -Math.PI / 2.2;
           hindRight.hock.rotation.x = -Math.PI / 2.2;
           break;
+        case 'breech':
+          hindLeft.hip.rotation.x = Math.PI / 1.8;
+          hindRight.hip.rotation.x = Math.PI / 1.8;
+          break;
+        case 'hockFlexion':
+          hindRight.hock.rotation.x = Math.PI / 1.8;
+          break;
       }
 
-      const isNormal = (pres === 'anterior' && pos === 'dorsal' && post === 'normal');
-      if (isNormal) {
-        infoBadge.className = 'badge badge-normal';
-        infoBadge.innerText = '정상 분만';
-        infoTitle.innerText = '정상 종위·두위 상태향';
-        infoDesc.innerText = '어미소 골반 입구(빨간 링)로 양 앞다리와 머리가 먼저 통과하는 최적의 자세입니다.';
-        infoTreat.innerText = '자연 분만 관찰 및 유도';
-      } else {
-        infoBadge.className = 'badge badge-abnormal';
-        infoBadge.innerText = '난산 (Dystocia)';
-        infoTitle.innerText = `${selPres.options[selPres.selectedIndex].text} / ${selPost.options[selPost.selectedIndex].text}`;
-        
-        if (post.includes('carpal')) {
-          infoDesc.innerText = '완관절(주황색 구)이 꺾여 골반 치골 턱에 걸려 배출이 정체됩니다.';
-          infoTreat.innerText = '태아 반발(자궁 안으로 밈) 후 발목을 들어올려 산도 방향으로 신전';
-        } else if (post === 'breech') {
-          infoDesc.innerText = '꼬리태위에서 뒷다리가 배 밑으로 접혀 엉덩이만 골반 림에 걸린 완전 둔위입니다.';
-          infoTreat.innerText = '손을 깊숙이 넣어 비절을 외측 회전시키며 발목을 산도로 단계적 정복';
-        } else if (post === 'shoulderFlexion') {
-          infoDesc.innerText = '한쪽 앞다리가 몸 밑으로 들어가 어깨만 걸려 진입이 멈춘 상태입니다.';
-          infoTreat.innerText = '태아 반발 후 완관절을 먼저 유도하고 발목을 단계적으로 산도로 신전';
-        } else {
-          infoDesc.innerText = '골반 통과 직경을 초과하여 배출이 정체됩니다.';
-          infoTreat.innerText = '산과적 정복술(Mutation: 반발·회전·신전) 시행';
-        }
-      }
+      // UI 텍스트 갱신
+      infoStatus.innerText = record.status;
+      infoMainBadge.className = record.status === "정상" ? "badge badge-normal" : "badge badge-abnormal";
+      infoMainBadge.innerText = record.status;
+      infoAlias.innerText = record.alias;
+      infoPostureDesc.innerText = record.postureDesc;
     }
 
-    [selPres, selPos, selPost].forEach(el => el.addEventListener('change', updateSimulation));
-    updateSimulation();
+    refreshPositionOptions();
 
-    // 투명도 슬라이더
+    // 슬라이더
     const opSlider = document.getElementById('damOpacity');
     const opText = document.getElementById('opacityVal');
     opSlider.addEventListener('input', (e) => {
       const val = parseFloat(e.target.value);
-      cowTransMat.opacity = val;
+      importedMaterials.forEach(m => m.opacity = val);
       opText.innerText = Math.round(val * 100) + '%';
     });
 
-    // 카메라 프리셋
-    window.setView = function(x, y, z) {
-      const isMobile = window.innerWidth <= 768;
-      const mult = isMobile ? 1.25 : 1.0;
-      camera.position.set(x * mult, y * mult, z * mult);
-      controls.target.set(0, 1.8, 0);
+    // 태아 중심 시점 제어
+    window.setView = function(offsetX, offsetY, offsetZ) {
+      const mult = window.innerWidth <= 768 ? 1.25 : 1.0;
+      camera.position.set(
+        FETUS_POS.x + offsetX * mult,
+        FETUS_POS.y + offsetY * mult,
+        FETUS_POS.z + offsetZ * mult
+      );
+      controls.target.set(FETUS_POS.x, FETUS_POS.y, FETUS_POS.z);
     };
 
-    // --- 5. 모바일 바텀시트 터치/토글 인터랙션 ---
+    // 모바일 바텀시트
     const sidebar = document.getElementById('sidebar');
     const sheetHandle = document.getElementById('sheetHandle');
-    let startY = 0;
-    let currentY = 0;
-
-    sheetHandle.addEventListener('click', () => {
-      sidebar.classList.toggle('expanded');
-    });
-
-    sheetHandle.addEventListener('touchstart', (e) => {
-      startY = e.touches[0].clientY;
-    }, { passive: true });
-
-    sheetHandle.addEventListener('touchmove', (e) => {
-      currentY = e.touches[0].clientY;
-      const diff = currentY - startY;
-      if (diff > 40) sidebar.classList.remove('expanded');
-      else if (diff < -40) sidebar.classList.add('expanded');
-    }, { passive: true });
-
-    // 3D 캔버스 터치 시 바텀시트 자동으로 내려주기
+    sheetHandle.addEventListener('click', () => sidebar.classList.toggle('expanded'));
     container.addEventListener('touchstart', () => {
       if (window.innerWidth <= 768 && sidebar.classList.contains('expanded')) {
         sidebar.classList.remove('expanded');
       }
     }, { passive: true });
 
-    // 화면 리사이즈/회전 대응
     window.addEventListener('resize', () => {
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
