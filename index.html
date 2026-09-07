@@ -18,7 +18,18 @@
       box-shadow: -4px 0 25px rgba(0,0,0,0.7); border-left: 1px solid #1f2937;
       z-index: 20; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .sheet-handle { display: none; width: 100%; padding: 8px 0 12px 0; justify-content: center; align-items: center; cursor: pointer; }
+    .sheet-handle { 
+  display: none; 
+  width: 100%; 
+  padding: 12px 0 10px 0; 
+  justify-content: center; 
+  align-items: center; 
+  cursor: pointer;
+  position: sticky;
+  top: 0;
+  background: #111827; /* 사이드바 배경과 일치 */
+  z-index: 30;
+}
     .sheet-handle-bar { width: 40px; height: 4px; background: #475569; border-radius: 2px; }
 
     h2 { font-size: 1.15rem; border-bottom: 2px solid #6366f1; padding-bottom: 8px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
@@ -48,17 +59,28 @@
     .legend-box { background: #0b0f19; border-radius: 8px; padding: 10px; font-size: 0.75rem; color: #94a3b8; display: flex; flex-direction: column; gap: 5px; border: 1px solid #1e293b; }
     .color-chip { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 
-    @media (max-width: 768px) {
-      body { flex-direction: column; }
-      #sidebar {
-        position: absolute; bottom: 0; left: 0; width: 100%; max-height: 80vh;
-        border-left: none; border-top: 1px solid #374151; border-radius: 16px 16px 0 0;
-        padding: 12px 18px 24px 18px; transform: translateY(calc(100% - 64px));
-      }
-      #sidebar.expanded { transform: translateY(0); }
-      .sheet-handle { display: flex; }
-      h2 { font-size: 1.05rem; }
-    }
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  #sidebar {
+    position: absolute; 
+    bottom: 0; 
+    left: 0; 
+    width: 100%; 
+    max-height: 80vh;
+    border-left: none; 
+    border-top: 1px solid #374151; 
+    border-radius: 16px 16px 0 0;
+    padding: 0 18px 24px 18px; /* 상단 패딩을 0으로 맞춰 sticky 핸들이 최상단에 밀착 */
+    transform: translateY(calc(100% - 50px)); /* 접혀있을 때 핸들 영역(50px)만 화면 하단에 상시 노출 */
+  }
+  #sidebar.expanded { 
+    transform: translateY(0); 
+  }
+  .sheet-handle { 
+    display: flex; 
+  }
+  h2 { font-size: 1.05rem; }
+}
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
