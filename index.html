@@ -18,45 +18,44 @@
       box-shadow: -4px 0 25px rgba(0,0,0,0.7); border-left: 1px solid #1f2937;
       z-index: 20; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-.sheet-handle { 
-  display: none; 
-  width: 100%; 
-  height: 56px; /* 핸들 높이 고정 */
-  flex-direction: column;
-  justify-content: center; 
-  align-items: center; 
-  cursor: pointer;
-  position: sticky;
-  top: 0;
-  background: #1e293b; /* 본문보다 밝은 톤으로 버튼 영역 분리 */
-  border-bottom: 1px solid #334155;
-  z-index: 30;
-  gap: 5px;
-  user-select: none;
-  margin: 0 -18px; /* 사이드바 좌우 패딩을 덮어 꽉 찬 탭 형태로 확장 */
-  padding: 0 18px;
-}
+    .sheet-handle { 
+      display: none; 
+      width: 100%; 
+      height: 56px; 
+      flex-direction: column;
+      justify-content: center; 
+      align-items: center; 
+      cursor: pointer;
+      position: sticky;
+      top: 0;
+      background: #1e293b; 
+      border-bottom: 1px solid #334155;
+      z-index: 30;
+      gap: 5px;
+      user-select: none;
+      margin: 0 -18px; 
+      padding: 0 18px;
+    }
+    .sheet-handle-bar { 
+      width: 44px; 
+      height: 4px; 
+      background: #64748b; 
+      border-radius: 2px; 
+    }
+    .sheet-handle-text {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sheet-handle-icon {
+      font-size: 0.72rem;
+      color: #818cf8;
+      transition: transform 0.2s ease;
+    }
 
-.sheet-handle-bar { 
-  width: 44px; 
-  height: 4px; 
-  background: #64748b; 
-  border-radius: 2px; 
-}
-.sheet-handle-text {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #cbd5e1;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.sheet-handle-icon {
-  font-size: 0.72rem;
-  color: #818cf8;
-  transition: transform 0.2s ease;
-}
     h2 { font-size: 1.15rem; border-bottom: 2px solid #6366f1; padding-bottom: 8px; color: #fff; display: flex; justify-content: space-between; align-items: center; }
     .control-group { display: flex; flex-direction: column; gap: 6px; }
     label { font-size: 0.82rem; font-weight: bold; color: #94a3b8; }
@@ -84,30 +83,29 @@
     .legend-box { background: #0b0f19; border-radius: 8px; padding: 10px; font-size: 0.75rem; color: #94a3b8; display: flex; flex-direction: column; gap: 5px; border: 1px solid #1e293b; }
     .color-chip { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 
-@media (max-width: 768px) {
-  body { flex-direction: column; }
-  #sidebar {
-    position: absolute; 
-    bottom: 0; 
-    left: 0; 
-    width: 100%; 
-    max-height: 82vh;
-    border-left: none; 
-    border-top: 2px solid #6366f1; /* 상단 보라색 포인트 라인 */
-    border-radius: 18px 18px 0 0;
-    padding: 0 18px 24px 18px;
-    /* 핸들 높이(56px)만큼만 남기고 완벽히 숨김 (내부 텍스트 노출 차단) */
-    transform: translateY(calc(100% - 56px));
-    background: #111827;
-  }
-  #sidebar.expanded { 
-    transform: translateY(0); 
-  }
-  .sheet-handle { 
-    display: flex; 
-  }
-  h2 { font-size: 1.05rem; margin-top: 14px; }
-}
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      #sidebar {
+        position: absolute; 
+        bottom: 0; 
+        left: 0; 
+        width: 100%; 
+        max-height: 82vh;
+        border-left: none; 
+        border-top: 2px solid #6366f1; 
+        border-radius: 18px 18px 0 0;
+        padding: 0 18px 24px 18px;
+        transform: translateY(calc(100% - 56px));
+        background: #111827;
+      }
+      #sidebar.expanded { 
+        transform: translateY(0); 
+      }
+      .sheet-handle { 
+        display: flex; 
+      }
+      h2 { font-size: 1.05rem; margin-top: 14px; }
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -123,13 +121,13 @@
   </div>
 
   <div id="sidebar">
-<div class="sheet-handle" id="sheetHandle">
-  <div class="sheet-handle-bar"></div>
-  <div class="sheet-handle-text">
-    <span class="sheet-handle-icon" id="sheetIcon">▲</span>
-    <span id="sheetLabel">산과 설정 및 자세 선택</span>
-  </div>
-</div>
+    <div class="sheet-handle" id="sheetHandle">
+      <div class="sheet-handle-bar"></div>
+      <div class="sheet-handle-text">
+        <span class="sheet-handle-icon" id="sheetIcon">▲</span>
+        <span id="sheetLabel">산과 설정 및 자세 선택</span>
+      </div>
+    </div>
 
     <h2>
       <span>수의산과 3D 시각화</span>
@@ -148,16 +146,12 @@
 
     <div class="control-group">
       <label for="position">2. 태향 (Position)</label>
-      <select id="position">
-        <!-- 동적으로 필터링됨 -->
-      </select>
+      <select id="position"></select>
     </div>
 
     <div class="control-group">
       <label for="posture">3. 태아의 자세 (태세 / Posture)</label>
-      <select id="posture">
-        <!-- 동적으로 필터링됨 -->
-      </select>
+      <select id="posture"></select>
     </div>
 
     <div class="control-group">
@@ -201,39 +195,9 @@
   </div>
 
   <script>
-
-    // 모바일 바텀시트 토글 및 안내문구 전환
-const sidebar = document.getElementById('sidebar');
-const sheetHandle = document.getElementById('sheetHandle');
-const sheetIcon = document.getElementById('sheetIcon');
-const sheetLabel = document.getElementById('sheetLabel');
-
-function toggleBottomSheet() {
-  const isExpanded = sidebar.classList.toggle('expanded');
-  if (isExpanded) {
-    sheetIcon.textContent = '▼';
-    sheetLabel.textContent = '메뉴 닫기';
-  } else {
-    sheetIcon.textContent = '▲';
-    sheetLabel.textContent = '산과 설정 및 자세 선택';
-  }
-}
-
-sheetHandle.addEventListener('click', toggleBottomSheet);
-
-// 배경(3D 캔버스) 터치 시 메뉴 닫기
-container.addEventListener('touchstart', () => {
-  if (window.innerWidth <= 768 && sidebar.classList.contains('expanded')) {
-    sidebar.classList.remove('expanded');
-    sheetIcon.textContent = '▲';
-    sheetLabel.textContent = '산과 설정 및 자세 선택';
-  }
-}, { passive: true });
-
-    
     const FETUS_POS = { x: 0, y: 3.7, z: 2.8 };
 
-    // --- 1. Three.js 기본 세팅 ---
+    // --- 1. Three.js 기본 세팅 (container 먼저 정의) ---
     const container = document.getElementById('canvas-container');
     const loadingScreen = document.getElementById('loading-screen');
     const scene = new THREE.Scene();
@@ -278,7 +242,7 @@ container.addEventListener('touchstart', () => {
       new THREE.BoxGeometry(0.35, 0.08, 0.08),
       new THREE.MeshBasicMaterial({ color: 0xf87171 })
     );
-    sacrumMarker.position.set(0, 4.08, 4.50); // 림 상단 위치에 정확히 정렬
+    sacrumMarker.position.set(0, 4.08, 4.50);
     worldCenter.add(sacrumMarker);
 
     // --- 3. 외부 GLB 모델 로더 ---
@@ -325,7 +289,7 @@ container.addEventListener('touchstart', () => {
       undefined,
       function (err) {
         console.warn('models/cow.glb 로드 오류:', err);
-        document.getElementById('loading-msg').innerText = 'models/cow.glb 로드 실패. 로컬 웹 서버(Live Server) 구동 여부를 확인하세요.';
+        loadingScreen.style.display = 'none'; // 로드 실패 시에도 화면 가림 방지
       }
     );
 
@@ -429,7 +393,6 @@ container.addEventListener('touchstart', () => {
 
     // --- 5. [표 7-3 정식 스키마 & 동적 필터 맵] ---
     const TABLE_SCHEMA = {
-      // 1. 세로·머리태위
       anterior: {
         name: "세로·머리태위",
         positions: {
@@ -530,8 +493,6 @@ container.addEventListener('touchstart', () => {
           }
         }
       },
-
-      // 2. 세로·꼬리태위
       posterior: {
         name: "세로·꼬리태위",
         positions: {
@@ -587,8 +548,6 @@ container.addEventListener('touchstart', () => {
           }
         }
       },
-
-      // 3. 가로태위
       transverse: {
         name: "가로태위",
         positions: {
@@ -609,8 +568,6 @@ container.addEventListener('touchstart', () => {
           }
         }
       },
-
-      // 4. 수직태위 (표 7-3: 태향 칸 생략)
       vertical: {
         name: "수직태위",
         positions: {
@@ -676,7 +633,7 @@ container.addEventListener('touchstart', () => {
     selPos.addEventListener('change', refreshPostureOptions);
     selPost.addEventListener('change', updateSimulation);
 
-    // --- 7. 3D 렌더링 및 해부학적 오일러 회전 엔진 ---
+    // --- 7. 3D 렌더링 및 오일러 회전 엔진 ---
     function updateSimulation() {
       const pres = selPres.value;
       const pos = selPos.value;
@@ -685,53 +642,34 @@ container.addEventListener('touchstart', () => {
       const record = TABLE_SCHEMA[pres]?.positions[pos]?.postures[post];
       if (!record) return;
 
-      // 3D 루트 회전 초기화
       fRoot.rotation.set(0, 0, 0);
 
-      // [핵심 교정 A] 태위(Presentation) 및 자세 방향 수학적 3D 매핑
+      // 태위 회전 매핑
       if (pres === 'anterior') {
-        // 세로·머리태위: 머리가 산도 출구(+Z) 향함
-        if (pos === 'dorsal') {
-          fRoot.rotation.set(0, 0, 0); // 등 위쪽 (+Y)
-        } else if (pos === 'rightLateral') {
-          fRoot.rotation.set(0, 0, -Math.PI / 2); // 등 오른쪽 (+X)
-        } else if (pos === 'leftLateral') {
-          fRoot.rotation.set(0, 0, Math.PI / 2); // 등 왼쪽 (-X)
-        } else if (pos === 'ventral') {
-          fRoot.rotation.set(0, 0, Math.PI); // 등 아래쪽 (-Y)
-        }
+        if (pos === 'dorsal') fRoot.rotation.set(0, 0, 0);
+        else if (pos === 'rightLateral') fRoot.rotation.set(0, 0, -Math.PI / 2);
+        else if (pos === 'leftLateral') fRoot.rotation.set(0, 0, Math.PI / 2);
+        else if (pos === 'ventral') fRoot.rotation.set(0, 0, Math.PI);
       } else if (pres === 'posterior') {
-        // 세로·꼬리태위: 꼬리가 산도 출구(+Z) 향함
-        if (pos === 'dorsal') {
-          fRoot.rotation.set(0, Math.PI, 0); // 등 위쪽 (+Y)
-        } else if (pos === 'rightLateral') {
-          fRoot.rotation.set(0, Math.PI, Math.PI / 2); // 등 오른쪽 (+X)
-        } else if (pos === 'leftLateral') {
-          fRoot.rotation.set(0, Math.PI, -Math.PI / 2); // 등 왼쪽 (-X)
-        } else if (pos === 'ventral') {
-          fRoot.rotation.set(0, Math.PI, Math.PI); // 등 아래쪽 (-Y)
-        }
+        if (pos === 'dorsal') fRoot.rotation.set(0, Math.PI, 0);
+        else if (pos === 'rightLateral') fRoot.rotation.set(0, Math.PI, Math.PI / 2);
+        else if (pos === 'leftLateral') fRoot.rotation.set(0, Math.PI, -Math.PI / 2);
+        else if (pos === 'ventral') fRoot.rotation.set(0, Math.PI, Math.PI);
       } else if (pres === 'transverse') {
-        // [완벽 검증] 가로태위: 태아 척추 장축이 좌우 X축에 100% 수평 정렬
         if (post === 'dorsalExit') {
-          // 가로·등쪽태위(횡배위): 태아의 등이 산도 출구(+Z)를 똑바로 향함
-          fRoot.rotation.set(Math.PI / 2, Math.PI / 2, 0);
+          fRoot.rotation.set(Math.PI / 2, Math.PI / 2, 0); // 등이 산도 향함
         } else {
-          // 가로·배쪽태위(횡복위): 태아의 배가 산도 출구(+Z)를 똑바로 향함
-          fRoot.rotation.set(-Math.PI / 2, Math.PI / 2, 0);
+          fRoot.rotation.set(-Math.PI / 2, Math.PI / 2, 0); // 배가 산도 향함
         }
       } else if (pres === 'vertical') {
-        // [완벽 검증] 수직태위: 태아 척추 장축이 상하 Y축에 100% 수직 정렬
         if (post === 'dorsalExit') {
-          // 세로·등쪽태위(종배위): 태아의 등이 산도 출구(+Z)를 똑바로 향함
-          fRoot.rotation.set(Math.PI / 2, 0, 0);
+          fRoot.rotation.set(Math.PI / 2, 0, 0); // 등이 산도 향함
         } else {
-          // 세로·배쪽태위(종복위): 태아의 배가 산도 출구(+Z)를 똑바로 향함
-          fRoot.rotation.set(-Math.PI / 2, 0, 0);
+          fRoot.rotation.set(-Math.PI / 2, 0, 0); // 배가 산도 향함
         }
       }
 
-      // 관절 각도 초기화
+      // 관절 각도 리셋
       neckPivot.rotation.set(0, 0, 0);
       foreLeft.shoulder.rotation.set(0, 0, 0);
       foreLeft.carpus.rotation.set(0, 0, 0);
@@ -744,7 +682,7 @@ container.addEventListener('touchstart', () => {
       hindRight.hip.rotation.set(0, 0, 0);
       hindRight.hock.rotation.set(0, 0, 0);
 
-      // 표 7-3 관절 꺾임 태세 매핑
+      // 관절 꺾임 매핑
       switch (post) {
         case 'headLateral':
           neckPivot.rotation.y = -Math.PI / 2.0;
@@ -793,7 +731,6 @@ container.addEventListener('touchstart', () => {
           break;
       }
 
-      // UI 텍스트 갱신
       infoStatus.innerText = record.status;
       infoMainBadge.className = record.status === "정상" ? "badge badge-normal" : "badge badge-abnormal";
       infoMainBadge.innerText = record.status;
@@ -812,7 +749,7 @@ container.addEventListener('touchstart', () => {
       opText.innerText = Math.round(val * 100) + '%';
     });
 
-    // 태아 중심 시점 제어
+    // 태아 기준 시점 제어
     window.setView = function(offsetX, offsetY, offsetZ) {
       const mult = window.innerWidth <= 768 ? 1.25 : 1.0;
       camera.position.set(
@@ -823,13 +760,30 @@ container.addEventListener('touchstart', () => {
       controls.target.set(FETUS_POS.x, FETUS_POS.y, FETUS_POS.z);
     };
 
-    // 모바일 바텀시트
+    // --- 8. 모바일 바텀시트 제어 (변수 선언 완료 후 안전하게 등록) ---
     const sidebar = document.getElementById('sidebar');
     const sheetHandle = document.getElementById('sheetHandle');
-    sheetHandle.addEventListener('click', () => sidebar.classList.toggle('expanded'));
+    const sheetIcon = document.getElementById('sheetIcon');
+    const sheetLabel = document.getElementById('sheetLabel');
+
+    function toggleBottomSheet() {
+      const isExpanded = sidebar.classList.toggle('expanded');
+      if (isExpanded) {
+        sheetIcon.textContent = '▼';
+        sheetLabel.textContent = '메뉴 닫기';
+      } else {
+        sheetIcon.textContent = '▲';
+        sheetLabel.textContent = '산과 설정 및 자세 선택';
+      }
+    }
+
+    sheetHandle.addEventListener('click', toggleBottomSheet);
+
     container.addEventListener('touchstart', () => {
       if (window.innerWidth <= 768 && sidebar.classList.contains('expanded')) {
         sidebar.classList.remove('expanded');
+        sheetIcon.textContent = '▲';
+        sheetLabel.textContent = '산과 설정 및 자세 선택';
       }
     }, { passive: true });
 
